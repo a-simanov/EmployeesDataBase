@@ -1,0 +1,43 @@
+#ifndef MAINWINDOW_H
+#define MAINWINDOW_H
+
+#include <QMainWindow>
+#include "loginwindow.h"
+#include <QSqlDatabase>
+#include <QSqlQuery>
+#include <QSqlError>
+#include <QSqlTableModel>
+#include <QDebug>
+#include <QMessageBox>
+#include <QListWidget>>
+
+QT_BEGIN_NAMESPACE
+namespace Ui {
+class MainWindow;
+}
+QT_END_NAMESPACE
+
+class MainWindow : public QMainWindow
+{
+    Q_OBJECT
+
+public:
+    MainWindow(QWidget *parent = nullptr);
+    ~MainWindow();
+
+private slots:
+    void on_btn_clear_table_clicked();
+
+    void on_lw_tables_itemDoubleClicked(QListWidgetItem *item);
+
+private:
+    Ui::MainWindow *ui;
+    LoginWindow login_window;
+    QSqlTableModel * model = nullptr;
+
+    void ProcessLogin (const QString& name_db, const QString& login, const QString& pass);
+    void ConnetDB(const QString& name_db, const QString& login, const QString& pass);
+    void CreateTable ();
+    void ShowTables();
+};
+#endif // MAINWINDOW_H
