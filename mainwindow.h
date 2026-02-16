@@ -30,10 +30,13 @@ private slots:
 
     void on_lw_tables_itemDoubleClicked(QListWidgetItem *item);
 
+    void on_btn_add_into_table_clicked();
+
 private:
     Ui::MainWindow *ui;
     LoginWindow login_window;
     QSqlTableModel * model = nullptr;
+    QString curr_table;
 
     void ProcessLogin (const QString& name_db, const QString& login, const QString& pass);
     void ConnetDB(const QString& name_db, const QString& login, const QString& pass);
