@@ -7,9 +7,13 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
     connect(&login_window, &LoginWindow::LoginAccept, this, &MainWindow::ProcessLogin);
+    connect(&dial_create_table, &DialogCreateTable::TableNameAccept, this, &MainWindow::CreateTable);
     this->hide();
     login_window.show();
+    dial_create_table.hide();
     ui->tableView->hide();
+    ui->btn_add_into_table->hide();
+    ui->btn_clear_table->hide();
 }
 
 MainWindow::~MainWindow()
@@ -53,7 +57,7 @@ void MainWindow::ConnetDB(const QString& name_db, const QString& login, const QS
     }
 }
 
-void MainWindow::CreateTable () {
+void MainWindow::CreateTable (const QString& table_name) {
     QSqlDatabase db = QSqlDatabase::database("MainMySqlConn");
 
     if (!db.isOpen()) {
@@ -61,16 +65,15 @@ void MainWindow::CreateTable () {
         return;
     }
     QSqlQuery query(db);
-    QString str = "CREATE TABLE IF NOT EXISTS TelBook("
+    QString str = QString("CREATE TABLE IF NOT EXISTS %1("
                 "id INT AUTO_INCREMENT PRIMARY KEY, "
                 "Firstname VARCHAR(20), "
                 "Lastname VARCHAR(20), "
                 "Tel INT"
-                ");";
+                ");").arg(table_name);
     if (!query.exec(str)) {
         qDebug() << "Ошибка создания таблицы:" << query.lastError().text();
     }
-    query.exec("INSERT INTO TelBook(Firstname, Lastname, Tel) VALUES ('Tom', 'Berenger', 41), ('Kot', 'Govnyuk', 2), ('Ya', 'Net', 35)");
     if (model) {
         ui->tableView->setModel(nullptr);
         model->deleteLater();
@@ -80,6 +83,7 @@ void MainWindow::CreateTable () {
     model->setTable("TelBook");
     model->select();
     ui->tableView->setModel(model);
+    ShowTables();
 
 }
 
@@ -111,7 +115,7 @@ void MainWindow::ShowTables() {
     }
     ui->lw_tables->clear();
     QStringList tables = db.tables();
-    ui->lw_tables->addItems(tables);
+    ui->lw_tables->addItems(tables);    
 }
 
 
@@ -131,9 +135,11 @@ void MainWindow::on_lw_tables_itemDoubleClicked(QListWidgetItem *item)
         model = nullptr;
     }
     model = new QSqlTableModel(this, db);
-    model->setTable("TelBook");
+    model->setTable(curr_table);
     model->select();
     ui->tableView->setModel(model);
+    ui->btn_add_into_table->show();
+    ui->btn_clear_table->show();
 }
 
 
@@ -146,7 +152,13 @@ void MainWindow::on_btn_add_into_table_clicked()
         return;
     }
     QSqlQuery query(db);
-    query.exec("INSERT INTO TelBook(Firstname, Lastname, Tel) VALUES ('Tom', 'Berenger', 41), ('Kot', 'Govnyuk', 2), ('Ya', 'Net', 35)");
+    query.exec(QString("INSERT INTO %1(Firstname, Lastname, Tel) VALUES ('Tom', 'Berenger', 41), ('Kot', 'Govnyuk', 2), ('Ya', 'Net', 35)").arg(curr_table));
     model->select();
+}
+
+
+void MainWindow::on_btn_create_tbl_clicked()
+{
+    dial_create_table.show();
 }
 

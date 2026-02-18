@@ -1,8 +1,10 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include <QMainWindow>
 #include "loginwindow.h"
+#include "dialogcreatetable.h"
+
+#include <QMainWindow>
 #include <QSqlDatabase>
 #include <QSqlQuery>
 #include <QSqlError>
@@ -32,15 +34,18 @@ private slots:
 
     void on_btn_add_into_table_clicked();
 
+    void on_btn_create_tbl_clicked();
+
 private:
     Ui::MainWindow *ui;
     LoginWindow login_window;
+    DialogCreateTable dial_create_table;
     QSqlTableModel * model = nullptr;
     QString curr_table;
 
     void ProcessLogin (const QString& name_db, const QString& login, const QString& pass);
     void ConnetDB(const QString& name_db, const QString& login, const QString& pass);
-    void CreateTable ();
+    void CreateTable (const QString& table_name);
     void ShowTables();
 };
 #endif // MAINWINDOW_H

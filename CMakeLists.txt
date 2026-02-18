@@ -25,6 +25,7 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         MANUAL_FINALIZATION
         ${PROJECT_SOURCES}
         loginwindow.cpp loginwindow.h loginwindow.ui
+        dialogcreatetable.h dialogcreatetable.cpp dialogcreatetable.ui
     )
 # Define target properties for Android with Qt 6 as:
 #    set_property(TARGET EmployeesDataBase APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR

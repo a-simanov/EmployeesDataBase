@@ -15,19 +15,22 @@
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout">
+    <item row="4" column="0">
+     <widget class="QListWidget" name="lw_tables"/>
+    </item>
     <item row="2" column="0">
      <layout class="QHBoxLayout" name="horizontalLayout">
       <item>
        <widget class="QPushButton" name="btn_add_into_table">
         <property name="text">
-         <string>Add</string>
+         <string>Add to table</string>
         </property>
        </widget>
       </item>
       <item>
        <widget class="QPushButton" name="btn_clear_table">
         <property name="text">
-         <string>Clear</string>
+         <string>Clear table</string>
         </property>
        </widget>
       </item>
@@ -40,8 +43,12 @@
       </property>
      </widget>
     </item>
-    <item row="4" column="0">
-     <widget class="QListWidget" name="lw_tables"/>
+    <item row="5" column="0">
+     <widget class="QPushButton" name="btn_create_tbl">
+      <property name="text">
+       <string>Create table</string>
+      </property>
+     </widget>
     </item>
    </layout>
   </widget>
