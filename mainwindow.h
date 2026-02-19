@@ -3,6 +3,7 @@
 
 #include "loginwindow.h"
 #include "dialogcreatetable.h"
+#include "dialogaddemployee.h"
 
 #include <QMainWindow>
 #include <QSqlDatabase>
@@ -40,6 +41,7 @@ private:
     Ui::MainWindow *ui;
     LoginWindow login_window;
     DialogCreateTable dial_create_table;
+    DialogAddEmployee dial_add_emp;
     QSqlTableModel * model = nullptr;
     QString curr_table;
 
@@ -47,5 +49,6 @@ private:
     void ConnetDB(const QString& name_db, const QString& login, const QString& pass);
     void CreateTable (const QString& table_name);
     void ShowTables();
+    void AddEmployee (const QString& name, const QString& last_name, const QString& tel);
 };
 #endif // MAINWINDOW_H

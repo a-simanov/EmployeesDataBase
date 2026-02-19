@@ -8,9 +8,11 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setupUi(this);
     connect(&login_window, &LoginWindow::LoginAccept, this, &MainWindow::ProcessLogin);
     connect(&dial_create_table, &DialogCreateTable::TableNameAccept, this, &MainWindow::CreateTable);
+    connect(&dial_add_emp, &DialogAddEmployee::GetEmployeeInfo, this, &MainWindow::AddEmployee);
     this->hide();
     login_window.show();
     dial_create_table.hide();
+    dial_add_emp.hide();
     ui->tableView->hide();
     ui->btn_add_into_table->hide();
     ui->btn_clear_table->hide();
@@ -97,8 +99,8 @@ void MainWindow::on_btn_clear_table_clicked()
     }
 
     QSqlQuery query(db);
-    if (query.exec("DELETE FROM TelBook")) {
-        qDebug() << "Table clear!";
+    if (query.exec(QString("TRUNCATE TABLE %1").arg(curr_table))) {
+        qDebug() << QString("Table %1 clear!").arg(curr_table);
         if (model) {
             model->select();
         }
@@ -142,9 +144,7 @@ void MainWindow::on_lw_tables_itemDoubleClicked(QListWidgetItem *item)
     ui->btn_clear_table->show();
 }
 
-
-void MainWindow::on_btn_add_into_table_clicked()
-{
+void MainWindow::AddEmployee (const QString& name, const QString& last_name, const QString& tel){
     QSqlDatabase db = QSqlDatabase::database("MainMySqlConn");
 
     if (!db.isOpen()) {
@@ -152,8 +152,23 @@ void MainWindow::on_btn_add_into_table_clicked()
         return;
     }
     QSqlQuery query(db);
-    query.exec(QString("INSERT INTO %1(Firstname, Lastname, Tel) VALUES ('Tom', 'Berenger', 41), ('Kot', 'Govnyuk', 2), ('Ya', 'Net', 35)").arg(curr_table));
-    model->select();
+    query.prepare(QString("INSERT INTO %1(Firstname, Lastname, Tel) VALUES (:first, :last, :tel)").arg(curr_table));
+    query.bindValue(":first", name);
+    query.bindValue(":last", last_name);
+    query.bindValue(":tel", tel);
+    if(query.exec()) {
+        qDebug() << "Employee add";
+        if (model) {
+            model->select();
+        }
+    } else {
+        qDebug() << "Erroe add employee";
+    }
+}
+
+void MainWindow::on_btn_add_into_table_clicked()
+{
+    dial_add_emp.show();
 }
 
 
