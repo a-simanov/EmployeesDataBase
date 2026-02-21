@@ -166,6 +166,41 @@ void MainWindow::AddEmployee (const QString& name, const QString& last_name, con
     }
 }
 
+void MainWindow::ExportTofile(const QString& file_name) {
+    QSqlDatabase db = QSqlDatabase::database("MainMySqlConn");
+    if (!db.isOpen()) return;
+
+    QFile file(file_name);
+    if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        qDebug() << "Не удалось создать файл!";
+        return;
+    }
+
+    QTextStream out(&file);
+    QSqlQuery query(QString("SELECT * FROM %1").arg(curr_table), db);
+
+    QSqlRecord rec = query.record();
+    int cols = rec.count();
+
+    for (int i = 0; i < cols; ++i) {
+        out << rec.fieldName(i) << (i == cols - 1 ? "" : ",");
+    }
+    out << "\n";
+
+    while (query.next()) {
+        for (int i = 0; i < cols; ++i) {
+            QString value = query.value(i).toString();
+            if (value.contains(',')) value = "\"" + value + "\"";
+            out << value << (i == cols - 1 ? "" : ",");
+        }
+        out << "\n";
+    }
+
+    file.close();
+    qDebug() << "Экспорт завершен успешно!";
+
+}
+
 void MainWindow::on_btn_add_into_table_clicked()
 {
     dial_add_emp.show();
@@ -175,5 +210,13 @@ void MainWindow::on_btn_add_into_table_clicked()
 void MainWindow::on_btn_create_tbl_clicked()
 {
     dial_create_table.show();
+}
+
+
+void MainWindow::on_pb_expor_to_file_clicked()
+{
+    QString file_name = QFileDialog::getSaveFileName(this, QString("Сохранить файл"), QDir::currentPath(), tr("*.txt"));
+    qDebug() << file_name;
+    ExportTofile(file_name);
 }
 

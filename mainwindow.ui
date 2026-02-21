@@ -28,6 +28,13 @@
        </widget>
       </item>
       <item>
+       <widget class="QPushButton" name="pb_expor_to_file">
+        <property name="text">
+         <string>Export to file</string>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QPushButton" name="btn_clear_table">
         <property name="text">
          <string>Clear table</string>

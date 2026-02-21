@@ -12,7 +12,9 @@
 #include <QSqlTableModel>
 #include <QDebug>
 #include <QMessageBox>
-#include <QListWidget>>
+#include <QListWidget>
+#include <QFileDialog>
+#include <QSqlRecord>
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -37,6 +39,8 @@ private slots:
 
     void on_btn_create_tbl_clicked();
 
+    void on_pb_expor_to_file_clicked();
+
 private:
     Ui::MainWindow *ui;
     LoginWindow login_window;
@@ -50,5 +54,6 @@ private:
     void CreateTable (const QString& table_name);
     void ShowTables();
     void AddEmployee (const QString& name, const QString& last_name, const QString& tel);
+    void ExportTofile(const QString& file_name);
 };
 #endif // MAINWINDOW_H
