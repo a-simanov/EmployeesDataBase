@@ -38,7 +38,6 @@ void MainWindow::ConnetDB(const QString& name_db, const QString& login, const QS
         }
         QSqlDatabase::removeDatabase(connectionName);
     }
-    QSqlDatabase::removeDatabase(connectionName);
     QSqlDatabase db = QSqlDatabase::addDatabase("QMYSQL", connectionName);
     db.setHostName("localhost");
     db.setDatabaseName(name_db);
