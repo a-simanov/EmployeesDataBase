@@ -14,8 +14,7 @@ MainWindow::MainWindow(QWidget *parent)
     dial_create_table.hide();
     dial_add_emp.hide();
     ui->tableView->hide();
-    ui->btn_add_into_table->hide();
-    ui->btn_clear_table->hide();
+    ui->gb_table_btns->hide();
 }
 
 MainWindow::~MainWindow()
@@ -116,7 +115,7 @@ void MainWindow::ShowTables() {
     }
     ui->lw_tables->clear();
     QStringList tables = db.tables();
-    ui->lw_tables->addItems(tables);    
+    ui->lw_tables->addItems(tables);
 }
 
 
@@ -139,8 +138,7 @@ void MainWindow::on_lw_tables_itemDoubleClicked(QListWidgetItem *item)
     model->setTable(curr_table);
     model->select();
     ui->tableView->setModel(model);
-    ui->btn_add_into_table->show();
-    ui->btn_clear_table->show();
+    ui->gb_table_btns->show();
 }
 
 void MainWindow::AddEmployee (const QString& name, const QString& last_name, const QString& tel){
@@ -200,6 +198,33 @@ void MainWindow::ExportTofile(const QString& file_name) {
 
 }
 
+void MainWindow::DeleteRow () {
+    QSqlDatabase db = QSqlDatabase::database("MainMySqlConn");
+
+    if (!db.isOpen()) {
+        qDebug() << "База не открыта!";
+        return;
+    }
+    QSqlQuery query(db);
+    query.prepare(QString("DELETE FROM %1 WHERE id = :id").arg(curr_table));
+    query.bindValue(":id", curr_row);
+    query.exec();
+
+    query.prepare(QString("UPDATE %1 SET id = id - 1 WHERE id > :id").arg(curr_table));
+    query.bindValue(":id", curr_row);
+    query.exec();
+
+    query.prepare(QString("ALTER TABLE %1 AUTO_INCREMENT = 1").arg(curr_table));
+    if(query.exec()) {
+        qDebug() << "Employee delete";
+        if (model) {
+            model->select();
+        }
+    } else {
+        qDebug() << "Erroe deleting employee";
+    }
+}
+
 void MainWindow::on_btn_add_into_table_clicked()
 {
     dial_add_emp.show();
@@ -215,7 +240,18 @@ void MainWindow::on_btn_create_tbl_clicked()
 void MainWindow::on_pb_expor_to_file_clicked()
 {
     QString file_name = QFileDialog::getSaveFileName(this, QString("Сохранить файл"), QDir::currentPath(), tr("*.txt"));
-    qDebug() << file_name;
     ExportTofile(file_name);
+}
+
+
+void MainWindow::on_btn_delete_row_clicked()
+{
+    DeleteRow();
+}
+
+
+void MainWindow::on_tableView_clicked(const QModelIndex &index)
+{
+    curr_row = index.row() + 1;
 }
 

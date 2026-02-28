@@ -41,6 +41,10 @@ private slots:
 
     void on_pb_expor_to_file_clicked();
 
+    void on_btn_delete_row_clicked();
+
+    void on_tableView_clicked(const QModelIndex &index);
+
 private:
     Ui::MainWindow *ui;
     LoginWindow login_window;
@@ -48,6 +52,7 @@ private:
     DialogAddEmployee dial_add_emp;
     QSqlTableModel * model = nullptr;
     QString curr_table;
+    int curr_row;
 
     void ProcessLogin (const QString& name_db, const QString& login, const QString& pass);
     void ConnetDB(const QString& name_db, const QString& login, const QString& pass);
@@ -55,5 +60,6 @@ private:
     void ShowTables();
     void AddEmployee (const QString& name, const QString& last_name, const QString& tel);
     void ExportTofile(const QString& file_name);
+    void DeleteRow ();
 };
 #endif // MAINWINDOW_H
