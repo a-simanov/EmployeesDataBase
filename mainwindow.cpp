@@ -45,12 +45,12 @@ void MainWindow::ConnetDB(const QString& name_db, const QString& login, const QS
     db.setPort(3306);
 
     if (!db.open()) {
-        qDebug() << "Ошибка подключения:" << db.lastError().text();
+        qDebug() << "Connection error:" << db.lastError().text();
         QMessageBox::warning(this, "Error","Incorrect DB name, login or pass!");
         login_window.show();
         this->hide();
     } else {
-        qDebug() << "Успешное подключение!";
+        qDebug() << "Connection completed!";
         login_window.hide();
         this->show();
         ShowTables();
@@ -72,7 +72,7 @@ void MainWindow::CreateTable (const QString& table_name) {
                 "Tel INT"
                 ");").arg(table_name);
     if (!query.exec(str)) {
-        qDebug() << "Ошибка создания таблицы:" << query.lastError().text();
+        qDebug() << "Error creating table:" << query.lastError().text();
     }
     if (model) {
         ui->tableView->setModel(nullptr);
@@ -92,7 +92,7 @@ void MainWindow::on_btn_clear_table_clicked()
     QSqlDatabase db = QSqlDatabase::database("MainMySqlConn");
 
     if (!db.isOpen()) {
-        qDebug() << "База не открыта!";
+        qDebug() << "BD don't open!";
         return;
     }
 
@@ -103,14 +103,14 @@ void MainWindow::on_btn_clear_table_clicked()
             model->select();
         }
     } else {
-        qDebug() << "Ошибка очистки:" << query.lastError().text();
+        qDebug() << "Clear table error:" << query.lastError().text();
     }
 }
 
 void MainWindow::ShowTables() {
     QSqlDatabase db = QSqlDatabase::database("MainMySqlConn");
     if (!db.isOpen()) {
-        qDebug() << "База не открыта!";
+        qDebug() << "BD don't open!";
         return;
     }
     ui->lw_tables->clear();
@@ -124,7 +124,7 @@ void MainWindow::on_lw_tables_itemDoubleClicked(QListWidgetItem *item)
     QSqlDatabase db = QSqlDatabase::database("MainMySqlConn");
 
     if (!db.isOpen()) {
-        qDebug() << "База не открыта!";
+        qDebug() << "BD don't open!!";
         return;
     }
     curr_table = item->text();
@@ -145,7 +145,11 @@ void MainWindow::AddEmployee (const QString& name, const QString& last_name, con
     QSqlDatabase db = QSqlDatabase::database("MainMySqlConn");
 
     if (!db.isOpen()) {
-        qDebug() << "База не открыта!";
+        qDebug() << "BD don't open!";
+        return;
+    }
+    if (!db.transaction()) {
+        qDebug() << "Can't start transaction: " << db.lastError().text();
         return;
     }
     QSqlQuery query(db);
@@ -154,12 +158,18 @@ void MainWindow::AddEmployee (const QString& name, const QString& last_name, con
     query.bindValue(":last", last_name);
     query.bindValue(":tel", tel);
     if(query.exec()) {
-        qDebug() << "Employee add";
-        if (model) {
-            model->select();
+        if (db.commit()) {
+            qDebug() << "Employee added and committed";
+            if (model) {
+                model->select();
+            }
+        } else {
+            qDebug() << "Commit error:" << db.lastError().text();
+            db.rollback();
         }
     } else {
-        qDebug() << "Erroe add employee";
+        qDebug() << "Error add employee";
+        db.rollback();
     }
 }
 
@@ -169,7 +179,7 @@ void MainWindow::ExportTofile(const QString& file_name) {
 
     QFile file(file_name);
     if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
-        qDebug() << "Не удалось создать файл!";
+        qDebug() << "Can' open file!";
         return;
     }
 
@@ -194,7 +204,7 @@ void MainWindow::ExportTofile(const QString& file_name) {
     }
 
     file.close();
-    qDebug() << "Экспорт завершен успешно!";
+    qDebug() << "Export to file completed successfully!";
 
 }
 
@@ -205,24 +215,43 @@ void MainWindow::DeleteRow () {
         qDebug() << "База не открыта!";
         return;
     }
+    if (!db.transaction()) {
+        qDebug() << "Can't start transaction: " << db.lastError().text();
+        return;
+    }
     QSqlQuery query(db);
     query.prepare(QString("DELETE FROM %1 WHERE id = :id").arg(curr_table));
     query.bindValue(":id", curr_row);
-    query.exec();
 
+    if(!query.exec()) {
+        qDebug() << "Deleting row error" << query.lastError().text();
+        db.rollback();
+        return;
+    }
     query.prepare(QString("UPDATE %1 SET id = id - 1 WHERE id > :id").arg(curr_table));
     query.bindValue(":id", curr_row);
-    query.exec();
+    if(!query.exec()) {
+        qDebug() << "Update ID error" << query.lastError().text();
+        db.rollback();
+        return;
+    }
+
+    if(!db.commit()) {
+        qDebug() << "Commit error!" << db.lastError().text();
+        db.rollback();
+        return;
+    }
 
     query.prepare(QString("ALTER TABLE %1 AUTO_INCREMENT = 1").arg(curr_table));
     if(query.exec()) {
-        qDebug() << "Employee delete";
-        if (model) {
-            model->select();
-        }
+        qDebug() << "Employee added and committed";
+            if (model) {
+                model->select();
+            }
     } else {
-        qDebug() << "Erroe deleting employee";
+        qDebug() << "Commit error:" << db.lastError().text();
     }
+
 }
 
 void MainWindow::on_btn_add_into_table_clicked()
@@ -239,7 +268,7 @@ void MainWindow::on_btn_create_tbl_clicked()
 
 void MainWindow::on_pb_expor_to_file_clicked()
 {
-    QString file_name = QFileDialog::getSaveFileName(this, QString("Сохранить файл"), QDir::currentPath(), tr("*.txt"));
+    QString file_name = QFileDialog::getSaveFileName(this, QString("Save file"), QDir::currentPath(), tr("*.txt"));
     ExportTofile(file_name);
 }
 
